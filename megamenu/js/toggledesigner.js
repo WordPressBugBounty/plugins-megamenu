@@ -114,9 +114,19 @@ jQuery(function($) {
 
                 var $response = $(response);
 
-                $('.mega-color-picker-input', $response).customColorPicker({ 
-                    defaultColor: '#DDDDDD', 
-                    showCssVarPalette: false
+                // initiate color picker fields
+                $(".mm_colorpicker", $response).spectrum({
+                    preferredFormat: "rgb",
+                    showInput: true,
+                    showAlpha: true,
+                    clickoutFiresChange: true,
+                    change: function(color) {
+                        if (color.getAlpha() === 0) {
+                            $(this).siblings('div.chosen-color').html('transparent');
+                        } else {
+                            $(this).siblings('div.chosen-color').html(color.toRgbString());
+                        }
+                    }
                 });
 
                 // initiate icon selector dropdowns

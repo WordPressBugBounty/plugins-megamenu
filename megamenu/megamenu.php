@@ -3,7 +3,7 @@
  * Plugin Name: Max Mega Menu
  * Plugin URI:  https://www.megamenu.com
  * Description: An easy to use mega menu plugin. Written the WordPress way.
- * Version:     3.6
+ * Version:     3.5
  * Author:      megamenu.com
  * Author URI:  https://www.megamenu.com
  * License:     GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 *
 		 * @var string
 		 */
-		public $version = '3.6';
+		public $version = '3.5';
 
 
 		/**
@@ -43,7 +43,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 *
 		 * @var string
 		 */
-		public $scss_last_updated = '2.7';
+		public $scss_last_updated = '2.4.1.3';
 
 
 		/**
@@ -75,6 +75,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 			add_action( 'after_setup_theme', array( $this, 'register_nav_menus' ) );
 
 			add_filter( 'wp_nav_menu_args', array( $this, 'modify_nav_menu_args' ), 99999 );
+			add_filter( 'wp_nav_menu', array( $this, 'add_responsive_toggle' ), 10, 2 );
 
 			add_filter( 'wp_nav_menu_objects', array( $this, 'add_widgets_to_menu' ), apply_filters( 'megamenu_wp_nav_menu_objects_priority', 10 ), 2 );
 			add_filter( 'megamenu_nav_menu_objects_before', array( $this, 'apply_depth_to_menu_items' ), 5, 2 );
@@ -526,16 +527,26 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 * @return string
 		 * @since  1.3
 		 */
-		public function get_mobile_toggle_bar( $args, $menu_settings, $menu_theme ) {
-			$theme_id = $menu_settings['theme'];
+		public function add_responsive_toggle( $nav_menu, $args ) {
+			$args = (object) $args;
+
+			// make sure we're working with a Mega Menu.
+			if ( ! property_exists( $args, 'walker' ) || ! $args->walker || ! is_a( $args->walker, 'Mega_Menu_Walker' ) ) {
+				return $nav_menu;
+			}
+
+			$find = '<ul id="' . $args->menu_id . '"';
+
+			$theme_id = mmm_get_theme_id_for_location( $args->theme_location );
+
 			$content = '';
-			$nav_menu = '';
 
 			$content = apply_filters( 'megamenu_toggle_bar_content', $content, $nav_menu, $args, $theme_id );
 
-			return '<div class="mega-menu-toggle">' . $content . '</div>';
-		}
+			$replace = '<div class="mega-menu-toggle">' . $content . '</div>' . $find;
 
+			return str_replace( $find, $replace, $nav_menu );
+		}
 
 		/**
 		 * Return the html for mobile menu close button
@@ -546,8 +557,11 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 * @since  3.4
 		 */
 		public function get_mobile_close_button( $args, $menu_settings, $menu_theme ) {
+		    // Cast $args to object if it is an array
+		    $args = (object) $args;
+
 		    // Retrieve CSS version
-		    $css_version = Mega_Menu_Style_Manager::get_css_version();
+		    $css_version = get_transient( 'megamenu_css_version' );
 
 		    // Only proceed if CSS version is 3.4 or higher
 		    if ( ! $css_version || version_compare( $css_version, '3.3.3', '<' ) ) {
@@ -1066,7 +1080,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 						$item->classes[] = 'disable-link';
 					}
 
-					if ( 'true' === $item->megamenu_settings['collapse_children'] && $item->parent_submenu_type !== 'tabbed' ) {
+					if ( 'true' === $item->megamenu_settings['collapse_children'] ) {
 						$item->classes[] = 'collapse-children';
 					}
 
@@ -1264,10 +1278,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 						'data-effect-speed'          => isset( $menu_settings['effect_speed'] ) ? $menu_settings['effect_speed'] : '200',
 						'data-effect-mobile'         => $effect_mobile,
 						'data-effect-speed-mobile'   => $effect_speed_mobile,
-						'data-panel-width'           => (
-														    preg_match('/^\d/', $menu_theme['panel_width']) !== 1 || 
-														    preg_match('/^\d+(vw|vh|vmin|vmax)$/', $menu_theme['panel_width']) === 1
-														) ? $menu_theme['panel_width'] : '',
+						'data-panel-width'           => preg_match( '/^\d/', $menu_theme['panel_width'] ) !== 1 ? $menu_theme['panel_width'] : '',
 						'data-panel-inner-width'     => substr( trim( $menu_theme['panel_inner_width'] ), -1 ) !== '%' ? $menu_theme['panel_inner_width'] : '',
 						'data-mobile-force-width'    => $mobile_force_width,
 						'data-second-click'          => $second_click,
@@ -1297,7 +1308,6 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 				$sanitized_location = str_replace( apply_filters( 'megamenu_location_replacements', array( '-', ' ' ) ), '-', $current_theme_location );
 
 				$close_button = $this->get_mobile_close_button( $args, $menu_settings, $menu_theme );
-				$toggle_bar = $this->get_mobile_toggle_bar( $args, $menu_settings, $menu_theme );
 
 				$defaults = array(
 					'menu'            => wp_get_nav_menu_object( $menu_id ),
@@ -1311,7 +1321,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 					'after'           => '',
 					'link_before'     => '',
 					'link_after'      => '',
-					'items_wrap'      => $toggle_bar . '<ul' . $attributes . '>%3$s</ul>' . $close_button,
+					'items_wrap'      => '<ul' . $attributes . '>%3$s</ul>' . $close_button,
 					'depth'           => 0,
 					'walker'          => new Mega_Menu_Walker(),
 				);
@@ -1350,7 +1360,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 				return;
 			}
 
-			$css_version = Mega_Menu_Style_Manager::get_css_version();
+			$css_version = get_transient( 'megamenu_css_version' );
 			$css         = get_transient( 'megamenu_css' );
 
 			if ( $css && version_compare( $this->scss_last_updated, $css_version, '>' ) ) :

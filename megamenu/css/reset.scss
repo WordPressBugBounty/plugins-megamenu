@@ -4,8 +4,7 @@
     #{$wrap} #{$menu} p,
     #{$wrap} #{$menu} img:not(.mega-menu-logo),
     #{$wrap} #{$menu} div,
-    #{$wrap} #{$menu} a,
-    #{$wrap} #{$menu} button {
+    #{$wrap} #{$menu} a {
         color: $panel_font_color;
         font-family: unquote($panel_font_family);
         font-size: $panel_font_size;

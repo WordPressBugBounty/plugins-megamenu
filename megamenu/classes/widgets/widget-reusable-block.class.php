@@ -19,8 +19,8 @@ if ( ! class_exists( 'Mega_Menu_Widget_Reusable_Block' ) ) :
 		public function __construct() {
 			parent::__construct(
 				'maxmegamenu_reusable_block', // Base ID
-				'Block Pattern (MMM)', // Name
-				array( 'description' => __( 'Outputs a saved block pattern.', 'megamenu' ) ) // Args
+				'Reusable Block (MMM)', // Name
+				array( 'description' => __( 'Outputs a reusable block.', 'megamenu' ) ) // Args
 			);
 		}
 
@@ -40,15 +40,9 @@ if ( ! class_exists( 'Mega_Menu_Widget_Reusable_Block' ) ) :
 
 			extract( $args );
 
-			$title = isset( $instance['title'] ) ? apply_filters( 'widget_title', $instance['title'] ) : "";
-
 			echo $before_widget;
 
-			if ( ! empty( $title ) ) {
-				echo $before_title . $title . $after_title;
-			}
-
-			echo do_blocks( do_shortcode ( get_post_field( 'post_content', $instance['block'] ) ) );
+			echo do_blocks( get_post_field( 'post_content', $instance['block'] ) );
 
 			echo $after_widget;
 		}
@@ -66,7 +60,6 @@ if ( ! class_exists( 'Mega_Menu_Widget_Reusable_Block' ) ) :
 		public function update( $new_instance, $old_instance ) {
 			$instance          = array();
 			$instance['block'] = ! empty( $new_instance['block'] ) ? $new_instance['block'] : 0;
-			$instance['title']    = strip_tags( $new_instance['title'] );
 
 			return $instance;
 		}
@@ -82,10 +75,7 @@ if ( ! class_exists( 'Mega_Menu_Widget_Reusable_Block' ) ) :
 		public function form( $instance ) {
 			$block_id = ! empty( $instance['block'] ) ? absint( $instance['block'] ) : 0;
 
-			if ( isset( $instance['title'] ) ) {
-				$title = $instance['title'];
-			}
-
+			$widget_title = $block_id ? get_post_field( 'post_title', $block_id ) : '';
 
 			$posts = get_posts(
 				array(
@@ -104,10 +94,7 @@ if ( ! class_exists( 'Mega_Menu_Widget_Reusable_Block' ) ) :
 
 			// Input field with id is required for WordPress to display the title in the widget header.
 			?>
-				<p>
-					<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'megamenu' ); ?></label>
-					<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
-				</p>
+			<input type="hidden" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" value="<?php echo esc_attr( $widget_title ); ?>">
 		
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'block' ) ); ?>"><?php esc_attr_e( 'Block', 'megamenu' ); ?>:</label> 
