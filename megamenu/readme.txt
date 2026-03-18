@@ -3,7 +3,7 @@ Contributors: megamenu
 Tags: menu, responsive menu, mega menu, navigation, mobile menu
 Requires at least: 6.2
 Tested up to: 6.9
-Stable tag: 3.7
+Stable tag: 3.8
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -131,6 +131,11 @@ See https://www.megamenu.com for more screenshots
 5. Back end: Use the theme editor to change the appearance of your menus
 
 == Changelog ==
+
+= 3.8.1 =
+
+* Accessibility fix: Ensure IDs are applied to all necessary sub menus
+* Accessibility fix: Remove unnecessary instances of tabindex attribute
 
 = 3.8 =
 
