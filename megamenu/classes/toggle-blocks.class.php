@@ -29,15 +29,15 @@ if ( ! class_exists( 'Mega_Menu_Toggle_Blocks' ) ) :
 			add_filter( 'megamenu_load_scss_file_contents', [ $this, 'append_scss' ], 10 );
 			add_filter( 'megamenu_toggle_bar_content', [ $this, 'output_public_toggle_blocks' ], 10, 4 );
 
-			add_action( 'wp_ajax_megamenu_get_toggle_block_menu_toggle', [ $this, 'output_menu_toggle_block_html' ] );
+			add_action( 'wp_ajax_mm_get_toggle_block_menu_toggle', [ $this, 'output_menu_toggle_block_html' ] );
 			add_action( 'megamenu_output_admin_toggle_block_menu_toggle', [ $this, 'output_menu_toggle_block_html' ], 10, 2 );
 			add_action( 'megamenu_output_public_toggle_block_menu_toggle', [ $this, 'output_menu_public_toggle_block_html' ], 10, 3 );
 
-			add_action( 'wp_ajax_megamenu_get_toggle_block_menu_toggle_animated', [ $this, 'output_menu_toggle_block_animated_html' ] );
+			add_action( 'wp_ajax_mm_get_toggle_block_menu_toggle_animated', [ $this, 'output_menu_toggle_block_animated_html' ] );
 			add_action( 'megamenu_output_admin_toggle_block_menu_toggle_animated', [ $this, 'output_menu_toggle_block_animated_html' ], 10, 2 );
 			add_action( 'megamenu_output_public_toggle_block_menu_toggle_animated', [ $this, 'output_menu_public_toggle_block_animated_html' ], 10, 3 );
 
-			add_action( 'wp_ajax_megamenu_get_toggle_block_spacer', [ $this, 'output_spacer_block_html' ] );
+			add_action( 'wp_ajax_mm_get_toggle_block_spacer', [ $this, 'output_spacer_block_html' ] );
 			add_action( 'megamenu_output_admin_toggle_block_spacer', [ $this, 'output_spacer_block_html' ], 10, 2 );
 
 			add_action( 'megamenu_after_theme_revert', [ $this, 'revert_toggle_blocks' ] );

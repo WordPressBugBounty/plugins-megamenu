@@ -597,7 +597,7 @@ jQuery(function ($) {
                 type: "POST",
                 url: ajaxurl,
                 data: {
-                    action: "megamenu_get_toggle_block_" + val,
+                    action: "mm_get_toggle_block_" + val,
                     _wpnonce: settings.edit_nonce || "",
                 },
                 cache: false,
