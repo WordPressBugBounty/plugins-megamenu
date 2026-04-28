@@ -2,9 +2,9 @@
 Contributors: megamenu
 Tags: menu, responsive menu, mega menu, navigation, mobile menu
 Requires at least: 6.2
-Tested up to: 6.9
-Stable tag: 3.8
-Requires PHP: 5.6
+Tested up to: 7.0
+Stable tag: 3.8.1
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,15 @@ See https://www.megamenu.com for more screenshots
 5. Back end: Use the theme editor to change the appearance of your menus
 
 == Changelog ==
+
+= 3.9 =
+
+This release aims to modernise and simplify all areas of the admin interface.
+
+* Admin related code refactored and hardened
+* Menu Locations are now shown as 'cards' and their appearance is now standardised across the plugin
+* Rename the "Sandbox" functionality to "Preview", expand its functionality and make it more prominent
+* Remove legacy code and scripts, fix all jQuery migrate issues
 
 = 3.8.1 =
 
