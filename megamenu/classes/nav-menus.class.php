@@ -326,6 +326,11 @@ if ( ! class_exists( 'Mega_Menu_Nav_Menus' ) ) :
 
 			$prefix = isset( $settings['prefix'] ) ? $settings['prefix'] : 'true';
 
+			$initial_version = get_option( 'megamenu_initial_version' );
+			if ( $initial_version && version_compare( $initial_version, '3.9.2', '>=' ) ) {
+				$prefix = false;
+			}
+
 			wp_localize_script(
 				'maxmegamenu',
 				'megamenu',
@@ -339,7 +344,7 @@ if ( ! class_exists( 'Mega_Menu_Nav_Menus' ) ) :
 					'nonce'              => wp_create_nonce( 'megamenu_edit' ),
 					'nonce_check_failed' => __( 'Oops. Something went wrong. Please reload the page.', 'megamenu' ),
 					'css_prefix'         => $prefix,
-					'css_prefix_message' => __( "Custom CSS Classes will be prefixed with 'mega-'", 'megamenu' ),
+					'css_prefix_message' => false === $prefix ? '' : __( "Custom CSS Classes will be prefixed with 'mega-'", 'megamenu' ),
 					'row_is_full'        => __( 'There is not enough space in this row to add a new column. Make space by reducing the width of the columns within the row or create a new row.', 'megamenu' ),
 					'delete_menu_item'   => __( 'To remove this menu item, close this window and delete it directly from the menu structure.', 'megamenu' ),
 					'close'                => __( 'Close', 'megamenu' ),

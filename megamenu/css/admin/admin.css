@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .megamenu-modal-close {
   appearance: none;
   -webkit-appearance: none;
@@ -793,6 +794,7 @@ body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
   background: white;
   font-size: 14px;
+  /* Our `display: block` above beats UA `[hidden]` — restore hiding when editing. */
 }
 body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox:hover {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.07);
@@ -845,6 +847,84 @@ body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location
   font-size: 22px;
   line-height: 1;
   color: #646970;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-cluster {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-display {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-text[hidden] {
+  display: none;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title-edit {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: #787c82;
+  line-height: 1;
+  box-shadow: none;
+  text-shadow: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title-edit .dashicons {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  line-height: 1;
+  speak: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title-edit:focus-visible {
+  outline: 2px solid var(--wp-admin-theme-color);
+  outline-offset: 2px;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-cluster:hover .mega-location__title-edit,
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title--editable .mega-location__title-cluster:focus-within .mega-location__title-edit {
+  opacity: 1;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__title-cluster:has(.mega-location__title-edit-field:not([hidden])) .mega-location__title-edit {
+  display: none;
+}
+body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location-card-title-input {
+  box-sizing: border-box;
+  width: fit-content;
+  min-width: 3ch;
+  max-width: 100%;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  -webkit-field-sizing: content;
+  field-sizing: content;
 }
 body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location-cards-root .mega-location.postbox .mega-location__header-actions {
   display: inline-flex;
@@ -3543,6 +3623,22 @@ body.maxmegamenu-admin .megamenu-admin-modal.megamenu-scss-variables-dialog .meg
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__loading-spinner {
   border-top-color: var(--wp-block-synced-color, #7a00df);
 }
+body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__title .megamenu-admin-modal__title-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-location-settings-title-prefix {
+  flex-shrink: 0;
+}
+body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-location-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-location-settings-dialog__footer .megamenu-location-settings-dialog-save.button.button-primary {
   background: var(--wp-block-synced-color, #7a00df);
   border-color: var(--wp-block-synced-color, #7a00df);
@@ -3675,7 +3771,7 @@ body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .
   content: "\f111";
 }
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__body .megamenu-location-settings-dialog__surface .mega-tablist button[data-tab-section=general]::before {
-  content: "\f108";
+  content: "\f472";
 }
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__body .megamenu-location-settings-dialog__surface .mega-tablist button[data-tab-section=theme]::before {
   content: "\f100";
@@ -3690,7 +3786,10 @@ body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .
   content: "\f103";
 }
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__body .megamenu-location-settings-dialog__surface .mega-tablist button[data-tab-section=overlay]::before {
-  content: "\f472";
+  content: "\f188";
+}
+body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__body .megamenu-location-settings-dialog__surface .mega-tablist button[data-tab-section=mobile]::before {
+  content: "\f470";
 }
 body.maxmegamenu-admin .megamenu-admin-modal.megamenu-location-settings-dialog .megamenu-admin-modal__body .megamenu-location-settings-dialog__surface .megamenu-dialog-panels {
   padding: 10px 32px 32px;
@@ -4511,5 +4610,3 @@ body.maxmegamenu-admin .megamenu_wrap.megamenu-dialog-rail > .megamenu-dialog-pa
     background-position: 200px 0;
   }
 }
-
-/*# sourceMappingURL=admin.css.map */

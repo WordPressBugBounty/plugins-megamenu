@@ -560,7 +560,7 @@ if ( ! class_exists( 'Mega_Menu_Menu_Item_Manager' ) ) :
 			$row_columns = 12;
 
 			if ( isset( $row_data['meta']['columns'] ) ) {
-				$row_columns = intval( $row_data['meta']['columns'] );
+				$row_columns = (int) $row_data['meta']['columns'];
 			}
 
 			$desktop_tooltip_visible = __( 'Row', 'megamenu' ) . ': ' . __( 'Visible on desktop', 'megamenu' );
@@ -637,7 +637,7 @@ if ( ! class_exists( 'Mega_Menu_Menu_Item_Manager' ) ) :
 			$row_columns = 12;
 
 			if ( isset( $row_data['meta']['columns'] ) ) {
-				$row_columns = intval( $row_data['meta']['columns'] );
+				$row_columns = (int) $row_data['meta']['columns'];
 			}
 
 			if ( isset( $col_data['meta']['span'] ) ) {

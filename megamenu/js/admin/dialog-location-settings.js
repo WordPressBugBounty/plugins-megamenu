@@ -2,6 +2,15 @@
 (function ($) {
     "use strict";
 
+    var locationTitleBlurTimer = null;
+
+    function megamenuLocationDialogClearTitleBlurTimer() {
+        if (locationTitleBlurTimer) {
+            clearTimeout(locationTitleBlurTimer);
+            locationTitleBlurTimer = null;
+        }
+    }
+
     function megamenuMountLocationSettingsDialogFromTemplate() {
         if (document.getElementById("megamenu-location-settings-dialog")) {
             return;
@@ -45,13 +54,24 @@
         return i[key] || "";
     }
 
-    function megamenuLocationSettingsDialogHeading(locationLabel) {
-        var tpl = megamenuLocationDialogI18n("dialog_title_tpl");
-        var name = locationLabel || "";
-        if (tpl && tpl.indexOf("%s") !== -1) {
-            return tpl.replace("%s", name);
+    function megamenuLocationDialogApplyHeadingLocationName(
+        $dialog,
+        plainLabel
+    ) {
+        var $tt = $dialog.find(".megamenu-admin-modal__title-text").first();
+        if (!$tt.length) {
+            return;
         }
-        return "Location Settings: " + name;
+        var tpl = megamenuLocationDialogI18n("dialog_title_tpl");
+        var prefix = "Location Settings:";
+        if (tpl && tpl.indexOf("%s") !== -1) {
+            prefix = tpl.split("%s")[0];
+        }
+        prefix = String(prefix).replace(/\s+$/, "");
+        $tt
+            .find(".megamenu-location-settings-title-prefix")
+            .text(prefix ? prefix + " " : "");
+        $tt.find(".megamenu-location-title").text(plainLabel || "");
     }
 
     /**
@@ -96,6 +116,7 @@
             window.MegamenuAdminModalExpand.collapseOnClose($dialog);
         }
         megamenuLocationDialogSetLoading($dialog, false);
+        megamenuLocationDialogClearTitleBlurTimer();
         $dialog.prop("hidden", true).removeClass("is-open");
         $("#megamenu-location-settings-dialog-body").empty();
         $("#megamenu-location-settings-dialog-subtitle").text("").prop("hidden", true);
@@ -103,6 +124,150 @@
             .find(".megamenu-admin-modal__panel")
             .attr("aria-labelledby", "megamenu-location-settings-dialog-title");
         megamenuSyncBodyDialogOpenClass();
+    }
+
+    function megamenuLocationDialogUpdateCardsLocationLabel(
+        location,
+        plainLabel,
+        previewTitle
+    ) {
+        var $r = $(
+            '.mega-location[data-mega-location="' + location + '"]'
+        ).first();
+        if (!$r.length) {
+            return;
+        }
+        $r.attr("data-mmm-plain-label", plainLabel);
+        $r.find(".mega-location-settings-open").attr(
+            "data-location-label",
+            plainLabel
+        );
+        $r.find(".megamenu-preview-open").each(function () {
+            var $p = $(this);
+            $p.attr("data-preview-location-label", plainLabel);
+            if (previewTitle) {
+                $p.attr("data-preview-title", previewTitle);
+            }
+        });
+        var $titleText = $r.find(".mega-location__title-text").first();
+        if ($titleText.length) {
+            $titleText.text(plainLabel);
+        }
+        $r.find(".mega-location-card-title-input").val(plainLabel);
+    }
+
+    function megamenuSyncDialogHeadingIfSameLocation(location, plainLabel) {
+        var $dialog = $("#megamenu-location-settings-dialog");
+        if (!$dialog.hasClass("is-open")) {
+            return;
+        }
+        if (($dialog.data("mmmLocation") || "") !== location) {
+            return;
+        }
+        $dialog.data("mmmPlainLabel", plainLabel);
+        megamenuLocationDialogApplyHeadingLocationName($dialog, plainLabel);
+    }
+
+    function locationCardTitleEls($row) {
+        return {
+            field: $row.find(".mega-location__title-edit-field"),
+            text: $row.find(".mega-location__title-text").first(),
+            btn: $row.find(".mega-location__title-edit"),
+            input: $row.find(".mega-location-card-title-input")
+        };
+    }
+
+    function locationCardTitleSaveFailed($input) {
+        window.alert(
+            megamenuLocationDialogI18n("title_save_error") ||
+                "Could not save the location name."
+        );
+        $input.trigger("focus");
+    }
+
+    function megamenuLocationCardResetTitleEdit($row) {
+        megamenuLocationDialogClearTitleBlurTimer();
+        if (!$row || !$row.length) {
+            return;
+        }
+        var d = locationCardTitleEls($row);
+        var plain = $row.attr("data-mmm-plain-label") || "";
+        d.field.prop("hidden", true);
+        d.text.prop("hidden", false);
+        d.btn.prop("hidden", false);
+        d.input.val(plain);
+    }
+
+    function megamenuLocationCardEnterTitleEdit($from) {
+        megamenuLocationDialogClearTitleBlurTimer();
+        var $row = $from.closest(".mega-location");
+        if (!$row.length || !$row.find("h2.mega-location__title--editable").length) {
+            return;
+        }
+        var d = locationCardTitleEls($row);
+        if (!d.field.prop("hidden")) {
+            d.input.trigger("focus");
+            return;
+        }
+        d.text.prop("hidden", true);
+        d.field.prop("hidden", false);
+        d.btn.prop("hidden", true);
+        d.input
+            .val(
+                $.trim(
+                    $row.attr("data-mmm-plain-label") || d.text.text() || ""
+                )
+            )
+            .trigger("focus");
+    }
+
+    function megamenuLocationCardCommitFromInput($input) {
+        megamenuLocationDialogClearTitleBlurTimer();
+        var $row = $input.closest(".mega-location");
+        var loc =
+            $input.attr("data-mega-location") ||
+            $row.attr("data-mega-location") ||
+            "";
+        var prev = $.trim($row.attr("data-mmm-plain-label") || "");
+        var next = $.trim($input.val());
+        if (
+            !next ||
+            next === prev ||
+            loc.indexOf("max_mega_menu_") !== 0
+        ) {
+            megamenuLocationCardResetTitleEdit($row);
+            return;
+        }
+
+        var dlg = window.megamenu_location_dialog || {};
+        $.ajax({
+            url: megamenuLocationAjaxUrl(),
+            type: "POST",
+            dataType: "json",
+            data: {
+                action: "megamenu_save_custom_location_title",
+                nonce: dlg.nonce,
+                location: loc,
+                title: next,
+            },
+        })
+            .done(function (res) {
+                if (!(res && res.success && res.data)) {
+                    locationCardTitleSaveFailed($input);
+                    return;
+                }
+                var t = res.data.title || next;
+                megamenuLocationDialogUpdateCardsLocationLabel(
+                    loc,
+                    t,
+                    res.data.preview_title || ""
+                );
+                megamenuSyncDialogHeadingIfSameLocation(loc, t);
+                megamenuLocationCardResetTitleEdit($row);
+            })
+            .fail(function () {
+                locationCardTitleSaveFailed($input);
+            });
     }
 
     function megamenuInitLocationDialogTabs($root) {
@@ -239,9 +404,10 @@
             return;
         }
 
-        $("#megamenu-location-settings-dialog-title .megamenu-admin-modal__title-text").text(
-            megamenuLocationSettingsDialogHeading(label)
-        );
+        megamenuLocationDialogApplyHeadingLocationName($dialog, label);
+
+        $dialog.data("mmmLocation", location);
+        $dialog.data("mmmPlainLabel", label);
 
         var assignedPrefix = megamenuLocationDialogI18n("assigned_menu_prefix");
         var assignedMenu = $trigger.attr("data-assigned-menu");
@@ -326,13 +492,6 @@
                 if ($r.length) {
                     megamenuApplyMmmRowState($r, enabled);
                     megamenuSyncEnabledBodyClassFromToggles();
-                    var $descInput = $form.find(
-                        'input[name="custom_location[' + location + ']"]'
-                    );
-                    if ($descInput.length) {
-                        $r.find(".mega-location__title-text").first()
-                            .text($descInput.val());
-                    }
                 }
             }
         };
@@ -358,6 +517,52 @@
                 done(false);
             });
     }
+
+    $(document).on(
+        "click",
+        "h2.mega-location__title--editable .mega-location__title-cluster",
+        function (e) {
+            var $tgt = $(e.target);
+            if ($tgt.closest(".mega-location-card-title-input").length) {
+                return;
+            }
+            var $row = $(this).closest(".mega-location");
+            if (
+                !$row.find(".mega-location__title-edit-field").prop("hidden") &&
+                $tgt.closest(".mega-location__title-edit-field").length
+            ) {
+                return;
+            }
+            e.preventDefault();
+            megamenuLocationCardEnterTitleEdit($(this));
+        }
+    );
+
+    $(document).on(
+        "focusout keydown",
+        ".mega-location-card-title-input",
+        function (e) {
+            var $input = $(this);
+            if (e.type === "keydown") {
+                if (e.key !== "Enter") {
+                    return;
+                }
+                e.preventDefault();
+                megamenuLocationCardCommitFromInput($input);
+                return;
+            }
+            var $row = $input.closest(".mega-location");
+            locationTitleBlurTimer = setTimeout(function () {
+                locationTitleBlurTimer = null;
+                if (
+                    $row.find(".mega-location__title-edit-field").prop("hidden")
+                ) {
+                    return;
+                }
+                megamenuLocationCardCommitFromInput($input);
+            }, 200);
+        }
+    );
 
     $(document).on(
         "click",
@@ -544,6 +749,19 @@
 
     $(document).on("keydown.megamenuLocationDlg", function (e) {
         if (e.key !== "Escape") {
+            return;
+        }
+        var $t = $(e.target);
+        var $cardRow = $t.closest(".mega-location");
+        if (
+            $t.hasClass("mega-location-card-title-input") &&
+            $cardRow.length &&
+            !$cardRow.find(".mega-location__title-edit-field").prop("hidden")
+        ) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            megamenuLocationCardResetTitleEdit($cardRow);
+            $cardRow.find(".mega-location__title-edit").trigger("focus");
             return;
         }
         var $dlg = $("#megamenu-location-settings-dialog");

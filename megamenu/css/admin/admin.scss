@@ -1439,6 +1439,65 @@ body.maxmegamenu-admin .menu_settings.menu_settings_menu_locations.mega-location
 			color: $text-secondary;
 		}
 
+		.mega-location__title--editable .mega-location__title-cluster {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			min-width: 0;
+			flex: 0 0 auto;
+			cursor: pointer;
+		}
+
+		.mega-location__title--editable .mega-location__title-display {
+			min-width: 0;
+			flex: 0 1 auto;
+		}
+
+		.mega-location__title--editable .mega-location__title-text {
+			display: block;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		/* Our `display: block` above beats UA `[hidden]` — restore hiding when editing. */
+		.mega-location__title--editable .mega-location__title-text[hidden] {
+			display: none;
+		}
+
+		.mega-location__title-edit {
+			@include megamenu-admin-ghost-icon-button-shell;
+			flex-shrink: 0;
+			opacity: 0;
+			transition: opacity 0.15s ease;
+
+			&:focus-visible {
+				@include mega-admin-focus-ring;
+			}
+		}
+
+		.mega-location__title--editable .mega-location__title-cluster:hover .mega-location__title-edit,
+		.mega-location__title--editable .mega-location__title-cluster:focus-within .mega-location__title-edit {
+			opacity: 1;
+		}
+
+		.mega-location__title-cluster:has(.mega-location__title-edit-field:not([hidden])) .mega-location__title-edit {
+			display: none;
+		}
+
+		.mega-location-card-title-input {
+			box-sizing: border-box;
+			width: fit-content;
+			min-width: 3ch;
+			max-width: 100%;
+			margin: 0;
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 1.35;
+			-webkit-field-sizing: content;
+			field-sizing: content;
+		}
+
 		.mega-location__header-actions {
 			display: inline-flex;
 			align-items: center;
@@ -4192,6 +4251,25 @@ body.maxmegamenu-admin {
 			border-top-color: $wp-block-synced-color;
 		}
 
+		.megamenu-admin-modal__title .megamenu-admin-modal__title-text {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		.megamenu-location-settings-title-prefix {
+			flex-shrink: 0;
+		}
+
+		.megamenu-location-title {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
 		.megamenu-location-settings-dialog__footer .megamenu-location-settings-dialog-save.button.button-primary {
 			background: $wp-block-synced-color;
 			border-color: $wp-block-synced-color;
@@ -4311,7 +4389,7 @@ body.maxmegamenu-admin {
 					}
 
 					&[data-tab-section="general"]::before {
-						content: "\f108";
+						content: "\f472";
 					}
 
 					&[data-tab-section="theme"]::before {
@@ -4331,7 +4409,11 @@ body.maxmegamenu-admin {
 					}
 
 					&[data-tab-section="overlay"]::before {
-						content: "\f472";
+						content: "\f188";
+					}
+
+					&[data-tab-section="mobile"]::before {
+						content: "\f470";
 					}
 				}
 

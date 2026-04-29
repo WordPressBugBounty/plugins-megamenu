@@ -26,6 +26,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 			add_action( 'wp_ajax_megamenu_get_location_settings_html', [ $this, 'ajax_get_location_settings_html' ] );
 			add_action( 'wp_ajax_megamenu_save_location_settings', [ $this, 'ajax_save_location_settings' ] );
+			add_action( 'wp_ajax_megamenu_save_custom_location_title', [ $this, 'ajax_save_custom_location_title' ] );
 			add_action( 'wp_ajax_megamenu_toggle_location_mmm', [ $this, 'ajax_toggle_location_mmm' ] );
 			add_action( 'wp_ajax_megamenu_delete_menu_location', [ $this, 'ajax_delete_menu_location' ] );
 
@@ -315,16 +316,14 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 					}
 				}
 
-				if ( ! isset( $merged['unbind'] ) ) {
-					$merged['unbind'] = 'disabled';
-				}
-
-				if ( ! isset( $merged['descriptions'] ) ) {
-					$merged['descriptions'] = 'disabled';
-				}
-
-				if ( ! isset( $merged['prefix'] ) ) {
-					$merged['prefix'] = 'disabled';
+				foreach ( [ 'descriptions', 'unbind', 'prefix' ] as $pill_key ) {
+					if ( array_key_exists( $pill_key, $loc_settings ) ) {
+						$raw_pill = $loc_settings[ $pill_key ];
+						$merged[ $pill_key ] = ( 'enabled' === $raw_pill || 'true' === $raw_pill ) ? 'enabled' : 'disabled';
+					} else {
+						// Unchecked pills omit the key; omitted rows (e.g. prefix UI off) — default disabled.
+						$merged[ $pill_key ] = 'disabled';
+					}
 				}
 
 				$merged_submit[ $loc ] = $merged;
@@ -411,19 +410,54 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 				]
 			);
 
-			// Custom location label lives in megamenu_locations.
-			if ( strpos( $location, 'max_mega_menu_' ) !== false && isset( $_POST['custom_location'] ) && is_array( $_POST['custom_location'] ) && isset( $_POST['custom_location'][ $location ] ) ) {
-				$locations = get_option( 'megamenu_locations', [] );
+			wp_send_json_success();
+		}
 
-				if ( ! is_array( $locations ) ) {
-					$locations = [];
-				}
 
-				$locations[ $location ] = sanitize_text_field( wp_unslash( $_POST['custom_location'][ $location ] ) );
-				update_option( 'megamenu_locations', $locations );
+		/**
+		 * AJAX: Save the display title for a custom (max_mega_menu_*) location (dialog header or Menu Locations card).
+		 *
+		 * @return void
+		 */
+		public function ajax_save_custom_location_title() {
+			check_ajax_referer( 'megamenu_edit', 'nonce' );
+
+			if ( ! current_user_can( apply_filters( 'megamenu_options_capability', 'edit_theme_options' ) ) ) {
+				wp_send_json_error();
 			}
 
-			wp_send_json_success();
+			$location = isset( $_POST['location'] ) ? sanitize_key( wp_unslash( $_POST['location'] ) ) : '';
+
+			if ( ! $location || 0 !== strpos( $location, 'max_mega_menu_' ) ) {
+				wp_send_json_error();
+			}
+
+			$all_locations = $this->get_registered_locations();
+
+			if ( ! isset( $all_locations[ $location ] ) ) {
+				wp_send_json_error();
+			}
+
+			$title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+
+			$locations = get_option( 'megamenu_locations', [] );
+
+			if ( ! is_array( $locations ) ) {
+				$locations = [];
+			}
+
+			$locations[ $location ] = $title;
+			update_option( 'megamenu_locations', $locations );
+
+			do_action( 'megamenu_after_save_settings' );
+			do_action( 'megamenu_delete_cache' );
+
+			wp_send_json_success(
+				[
+					'title'         => $title,
+					'preview_title' => Mega_Menu_Preview::get_preview_title( $location, $title ),
+				]
+			);
 		}
 
 
@@ -525,7 +559,9 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 					<div class="megamenu-admin-modal__header">
 						<div class="megamenu-admin-modal__title-group">
 							<h2 id="megamenu-location-settings-dialog-title" class="megamenu-admin-modal__title">
-								<span class="megamenu-admin-modal__title-text"></span>
+								<span class="megamenu-admin-modal__title-text">
+									<span class="megamenu-location-settings-title-prefix"></span><span class="megamenu-location-title"></span>
+								</span>
 							</h2>
 							<p id="megamenu-location-settings-dialog-subtitle" class="megamenu_subtitle" hidden></p>
 						</div>
@@ -646,6 +682,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 						'dialog_title_tpl'      => __( 'Location Settings: %s', 'megamenu' ),
 						'delete_confirm'        => __( 'Delete this menu location? This cannot be undone.', 'megamenu' ),
 						'delete_error'          => __( 'Could not delete this menu location.', 'megamenu' ),
+						'title_save_error'      => __( 'Could not save the location name.', 'megamenu' ),
 					],
 				]
 			);
@@ -779,10 +816,10 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 			self::print_location_cards_shell_open( 'meta' );
 			foreach ( $enabled_locations as $location => $description ) {
-				$this->show_location_row( $all_locations, $location, $description, $saved_settings );
+				$this->show_location_row( $all_locations, $location, $description, $saved_settings, 'meta' );
 			}
 			foreach ( $disabled_locations as $location => $description ) {
-				$this->show_location_row( $all_locations, $location, $description, $saved_settings );
+				$this->show_location_row( $all_locations, $location, $description, $saved_settings, 'meta' );
 			}
 			self::print_location_cards_grid_close();
 			self::print_location_cards_shell_close();
@@ -847,10 +884,10 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 				self::print_location_cards_shell_open();
 				foreach ( $enabled_locations as $location => $description ) {
-					$this->show_location_row( $all_locations, $location, $description, $saved_settings );
+					$this->show_location_row( $all_locations, $location, $description, $saved_settings, 'page' );
 				}
 				foreach ( $disabled_locations as $location => $description ) {
-					$this->show_location_row( $all_locations, $location, $description, $saved_settings );
+					$this->show_location_row( $all_locations, $location, $description, $saved_settings, 'page' );
 				}
 
 				$add_location_label = count( $all_locations ) > 0
@@ -1041,13 +1078,14 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 		 * Output the HTML for a location row (card layout on Mega Menu > Menu Locations).
 		 *
 		 * @since  2.8
-		 * @param  array  $locations     All registered menu locations.
-		 * @param  string $location      The current location identifier.
-		 * @param  string $description   Human-readable location description.
+		 * @param  array  $locations      All registered menu locations.
+		 * @param  string $location       The current location identifier.
+		 * @param  string $description    Human-readable location description.
 		 * @param  array  $saved_settings Saved plugin settings.
+		 * @param  string $cards_context  `page` (Mega Menu > Menu Locations) or `meta` (Appearance > Menus meta box).
 		 * @return void
 		 */
-		public function show_location_row( $locations, $location, $description, $saved_settings ) {
+		public function show_location_row( $locations, $location, $description, $saved_settings, $cards_context = 'page' ) {
 			$is_enabled_class = 'mega-location-disabled';
 
 			if ( max_mega_menu_is_enabled( $location ) ) {
@@ -1077,13 +1115,31 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 			?>
 
-			<div class="postbox mega-location <?php echo esc_attr( $is_enabled_class ); ?> <?php echo esc_attr( $mmm_row_class ); ?><?php echo esc_attr( $has_active_location_class ); ?>" data-mega-location="<?php echo esc_attr( $location ); ?>" data-has-nav-menu="<?php echo has_nav_menu( $location ) ? '1' : '0'; ?>">
+			<div class="postbox mega-location <?php echo esc_attr( $is_enabled_class ); ?> <?php echo esc_attr( $mmm_row_class ); ?><?php echo esc_attr( $has_active_location_class ); ?>" data-mega-location="<?php echo esc_attr( $location ); ?>" data-has-nav-menu="<?php echo has_nav_menu( $location ) ? '1' : '0'; ?>" data-mmm-plain-label="<?php echo esc_attr( $description ); ?>">
 				<div class="mega-inside">
 					<header class="mega-location__header">
 						<div class="mega-location__header-row">
-							<h2 class="mega-location__title">
+							<h2 class="mega-location__title<?php echo ( 'page' === $cards_context && strpos( $location, 'max_mega_menu_' ) === 0 ) ? ' mega-location__title--editable' : ''; ?>">
 								<span class="dashicons dashicons-location mega-location__title-icon" aria-hidden="true"></span>
-								<span class="mega-location__title-text"><?php echo esc_html( $description ); ?></span>
+								<?php if ( 'page' === $cards_context && strpos( $location, 'max_mega_menu_' ) === 0 ) : ?>
+									<span class="mega-location__title-cluster">
+										<span class="mega-location__title-display">
+											<span class="mega-location__title-text"><?php echo esc_html( $description ); ?></span>
+											<span class="mega-location__title-edit-field" hidden>
+												<?php
+												$card_title_input_id = 'mega-location-card-title-' . sanitize_key( $location );
+												?>
+												<label class="screen-reader-text" for="<?php echo esc_attr( $card_title_input_id ); ?>"><?php esc_html_e( 'Location name', 'megamenu' ); ?></label>
+												<input type="text" id="<?php echo esc_attr( $card_title_input_id ); ?>" class="mega-location-card-title-input regular-text" data-mega-location="<?php echo esc_attr( $location ); ?>" value="<?php echo esc_attr( $description ); ?>" autocomplete="off" />
+											</span>
+										</span>
+										<button type="button" class="mega-location__title-edit" aria-label="<?php esc_attr_e( 'Edit location name', 'megamenu' ); ?>">
+											<span class="dashicons dashicons-edit" aria-hidden="true"></span>
+										</button>
+									</span>
+								<?php else : ?>
+									<span class="mega-location__title-text"><?php echo esc_html( $description ); ?></span>
+								<?php endif; ?>
 							</h2>
 							<div class="mega-location__header-actions">
 								<?php
@@ -1273,7 +1329,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 			?>
 
-			<form class="megamenu-location-settings-dialog-form" method="post" action="#" data-location="<?php echo esc_attr( $location ); ?>">
+			<form class="megamenu-location-settings-dialog-form" method="post" action="#" data-location="<?php echo esc_attr( $location ); ?>" data-custom-location="<?php echo $is_custom_location ? '1' : '0'; ?>">
 				<?php wp_nonce_field( 'megamenu_edit', 'nonce' ); ?>
 				<input type="hidden" name="location" value="<?php echo esc_attr( $location ); ?>" />
 				<?php
@@ -1284,9 +1340,9 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 							'general'        => [
 								'priority' => 10,
-								'title'    => __( 'General Settings', 'megamenu' ),
+								'title'    => __( 'Desktop', 'megamenu' ),
 								'settings' => [
-									'event'         => [
+									'event'  => [
 										'priority'    => 10,
 										'title'       => __( 'Event', 'megamenu' ),
 										'description' => __( 'Select the event to trigger sub menus', 'megamenu' ),
@@ -1298,9 +1354,9 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 											],
 										],
 									],
-									'effect'        => [
+									'effect' => [
 										'priority'    => 20,
-										'title'       => __( 'Effect', 'megamenu' ),
+										'title'       => __( 'Sub Menu Effect', 'megamenu' ),
 										'description' => __( 'Select the desktop sub menu animation type', 'megamenu' ),
 										'settings'    => [
 											[
@@ -1317,8 +1373,14 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 											],
 										],
 									],
-									'effect_mobile' => [
-										'priority'    => 30,
+								],
+							],
+							'mobile'         => [
+								'priority' => 12,
+								'title'    => __( 'Mobile', 'megamenu' ),
+								'settings' => [
+									'effect_mobile'    => [
+										'priority'    => 10,
 										'title'       => __( 'Mobile Menu', 'megamenu' ),
 										'description' => __( 'Choose a style for your mobile menu', 'megamenu' ),
 										'settings'    => [
@@ -1339,6 +1401,30 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 												'key'   => 'effect_speed_mobile',
 												'value' => isset( $location_settings['effect_speed_mobile'] ) ? $location_settings['effect_speed_mobile'] : '200',
 												'title' => __( 'Speed', 'megamenu' ),
+											],
+										],
+									],
+									'mobile_behaviour' => [
+										'priority'    => 20,
+										'title'       => __( 'Sub Menu Behaviour', 'megamenu' ),
+										'description' => __( 'Define the sub menu toggle behaviour for the mobile menu.', 'megamenu' ),
+										'settings'    => [
+											[
+												'type'  => 'mobile_behaviour',
+												'key'   => 'mobile_behaviour',
+												'value' => $plugin_settings,
+											],
+										],
+									],
+									'mobile_state'     => [
+										'priority'    => 30,
+										'title'       => __( 'Sub Menu Default State', 'megamenu' ),
+										'description' => __( 'Define the default state of the sub menus when the mobile menu is visible.', 'megamenu' ),
+										'settings'    => [
+											[
+												'type'  => 'mobile_state',
+												'key'   => 'mobile_state',
+												'value' => $plugin_settings,
 											],
 										],
 									],
@@ -1374,30 +1460,6 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 											[
 												'type'  => 'click_behaviour',
 												'key'   => 'click_behaviour',
-												'value' => $plugin_settings,
-											],
-										],
-									],
-									'mobile_behaviour' => [
-										'priority'    => 20,
-										'title'       => __( 'Mobile Sub Menu Behaviour', 'megamenu' ),
-										'description' => __( 'Define the sub menu toggle behaviour for the mobile menu.', 'megamenu' ),
-										'settings'    => [
-											[
-												'type'  => 'mobile_behaviour',
-												'key'   => 'mobile_behaviour',
-												'value' => $plugin_settings,
-											],
-										],
-									],
-									'mobile_state' => [
-										'priority'    => 20,
-										'title'       => __( 'Mobile Sub Menu Default State', 'megamenu' ),
-										'description' => __( 'Define the default state of the sub menus when the mobile menu is visible.', 'megamenu' ),
-										'settings'    => [
-											[
-												'type'  => 'mobile_state',
-												'key'   => 'mobile_state',
 												'value' => $plugin_settings,
 											],
 										],
@@ -1524,26 +1586,10 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 						$plugin_settings
 					);
 
-				if ( $is_custom_location ) {
-
-					$settings['general']['settings']['location_description'] = [
-						'priority'    => 15,
-						'title'       => __( 'Location Description', 'megamenu' ),
-						'description' => __( 'Update the custom location description', 'megamenu' ),
-						'settings'    => [
-							[
-								'type'  => 'location_description',
-								'key'   => 'location_description',
-								'value' => $description,
-							],
-						],
-					];
-				}
-
 				$initial_version = get_option( 'megamenu_initial_version' );
 
-				if ( $initial_version && version_compare( $initial_version, '2.8', '>' ) ) {
-					//unset( $settings['advanced']['settings']['prefix'] ); // users who started out with 2.8.1+ will not see this option.
+				if ( $initial_version && version_compare( $initial_version, '3.9.2', '>=' ) ) {
+					unset( $settings['advanced']['settings']['prefix'] );
 				}
 
 				echo "<div class='megamenu-dialog-rail'>";
@@ -2409,7 +2455,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 
 			echo '</select>';
 			printf(
-				'<button type="button" class="megamenu-location-settings-dialog-edit-theme" aria-label="%1$s"><span class="dashicons dashicons-edit" aria-hidden="true"></span></button></span>',
+				'<button type="button" class="megamenu-location-settings-dialog-edit-theme" aria-label="%1$s"><span class="dashicons dashicons-external" aria-hidden="true"></span></button></span>',
 				esc_attr__( 'Edit selected menu theme', 'megamenu' )
 			);
 
