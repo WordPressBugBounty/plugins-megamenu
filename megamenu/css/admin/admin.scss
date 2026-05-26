@@ -1272,10 +1272,6 @@ body.maxmegamenu-admin .megamenu_outer_wrap table {
 			    display: inline-block;
 			    vertical-align: top;
 			    margin: 0 5px 0 0;
-
-			    input[type=text] {
-				    width: 50%;
-				}
 			}
 		}
 	}
@@ -6449,10 +6445,6 @@ body.maxmegamenu-admin.admin-bar .megamenu_wrap.megamenu-dialog-rail > .megamenu
 	100% {
 		transform: rotate(359deg);
 	}
-}
-
-body.maxmegamenu-admin .megamenu_outer_wrap table div.mega-toggle_blocks .toggle-bar-designer .mega-blocks .block .block-settings > label input[type=text] {
-	width: 50% !important;
 }
 
 body.folded.maxmegamenu-admin .toggle-bar-designer .mega-blocks .block.mega-open .block-settings {

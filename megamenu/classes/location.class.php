@@ -631,12 +631,6 @@ if ( ! class_exists( 'Mega_Menu_Location' ) ) :
 		 * @return Mega_Menu_Location[]
 		 */
 		public static function get_all() {
-			static $cache = null;
-
-			if ( null !== $cache ) {
-				return $cache;
-			}
-
 			$all_settings = get_option( 'megamenu_settings', [] );
 
 			// Theme-registered locations.
@@ -656,9 +650,7 @@ if ( ! class_exists( 'Mega_Menu_Location' ) ) :
 				$locations[ $id ] = new self( $id, $title, $settings );
 			}
 
-			$cache = $locations;
-
-			return $cache;
+			return $locations;
 		}
 
 

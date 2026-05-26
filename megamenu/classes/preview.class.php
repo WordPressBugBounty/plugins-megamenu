@@ -117,7 +117,8 @@ if ( ! class_exists( 'Mega_Menu_Location_Preview' ) ) :
 				return 0;
 			}
 
-			$theme_id   = Mega_Menu_Location::find( $location )->get_setting( 'theme', 'default' );
+			$loc        = Mega_Menu_Location::find( $location );
+			$theme_id   = $loc ? $loc->get_setting( 'theme', 'default' ) : 'default';
 			$menu_theme = Mega_Menu_Theme::find( $theme_id );
 
 			return absint( $menu_theme->get( 'responsive_breakpoint' ) );
@@ -308,7 +309,8 @@ if ( ! class_exists( 'Mega_Menu_Location_Preview' ) ) :
 
 			remove_action( 'wp_head', '_admin_bar_bump_cb' );
 
-			$theme_id   = Mega_Menu_Location::find( $location )->get_setting( 'theme', 'default' );
+			$loc        = Mega_Menu_Location::find( $location );
+			$theme_id   = $loc ? $loc->get_setting( 'theme', 'default' ) : 'default';
 			$menu_theme = Mega_Menu_Theme::find( $theme_id );
 			$show_jquery_notice = $this->menu_uses_jquery_panel_selectors( $menu_theme );
 

@@ -843,22 +843,10 @@
                 display: inline-flex;
                 align-items: center;
                 height: 100%;
-                vertical-align: top;
                 font-size: inherit;
-
-                @if $arrow_combinator == '>' {
-                    margin: 0 0 0 6px;
-                    color: inherit;
-                } @else {
-                    cursor: pointer;
-                    margin-right: -14px;
-                    right: 19px;
-                    top: 0;
-
-                    @include mobile {
-                        position: absolute;
-                    }
-                }
+                line-height: inherit;
+                margin: 0 0 0 6px;
+                color: inherit;
 
                 &:after {
                     display: block;

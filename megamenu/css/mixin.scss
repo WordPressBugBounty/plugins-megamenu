@@ -9,7 +9,6 @@
         width: 1em;
         height: 1em;
     } @else {
-        height: 100%;
         content: $val;
         font-family: $font;
         font-weight: $weight;

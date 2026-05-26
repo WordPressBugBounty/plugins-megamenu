@@ -2404,7 +2404,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 		 */
 		public function print_descriptions_option( $location ) {
 			$loc          = Mega_Menu_Location::find( $location );
-			$descriptions = $loc ? $loc->get_setting( 'descriptions', 'disabled' ) : 'disabled';
+			$descriptions = $loc ? $loc->get_setting( 'descriptions', 'enabled' ) : 'disabled';
 			$this->print_location_dialog_pill_checkbox( $location, 'descriptions', 'enabled', 'enabled' === $descriptions );
 		}
 
