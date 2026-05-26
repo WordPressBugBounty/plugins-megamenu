@@ -323,10 +323,6 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 					}
 				}
 
-				if ( 'enabled' === ( $base['prefix'] ?? '' ) ) {
-					$merged['prefix_keep_visible'] = '1';
-				}
-
 				$merged_submit[ $loc ] = $merged;
 			}
 
@@ -1528,12 +1524,6 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 			$plugin_settings = $this->get_plugin_settings();
 			$settings        = $this->build_location_settings_structure( $location, $plugin_settings );
 
-			$loc          = Mega_Menu_Location::find( $location );
-			$prefix       = $loc ? $loc->get_setting( 'prefix', 'disabled' ) : 'disabled';
-			if ( 'disabled' === $prefix && ! ( $loc && $loc->get_setting( 'prefix_keep_visible' ) ) ) {
-				unset( $settings['advanced']['settings']['prefix'] );
-			}
-
 			uasort( $settings, [ $this, 'compare_elems' ] );
 
 			?>
@@ -1722,7 +1712,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 											[
 												'type'  => 'prefix',
 												'key'   => 'prefix',
-												'value' => null,
+												'value' => $plugin_settings,
 											],
 										],
 									],
@@ -2034,7 +2024,7 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 										$this->print_unbind_option( $location );
 										break;
 									case 'prefix':
-										$this->print_prefix_option( $location );
+										$this->print_prefix_option( $location, $setting['value'] );
 										break;
 									case 'clean_classes':
 										$this->print_clean_classes_option( $location );
@@ -2424,9 +2414,15 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 		 * @param  array  $plugin_settings Saved plugin settings.
 		 * @return void
 		 */
-		public function print_prefix_option( $location ) {
-			$loc    = Mega_Menu_Location::find( $location );
-			$prefix = $loc ? $loc->get_setting( 'prefix', 'disabled' ) : 'disabled';
+		public function print_prefix_option( $location, $plugin_settings = [] ) {
+			$prefix = 'disabled';
+
+			if ( isset( $plugin_settings[ $location ]['prefix'] ) ) {
+				$prefix = $plugin_settings[ $location ]['prefix'];
+			} elseif ( isset( $plugin_settings['prefix'] ) ) {
+				$prefix = $plugin_settings['prefix'];
+			}
+
 			$this->print_location_dialog_pill_checkbox( $location, 'prefix', 'enabled', 'enabled' === $prefix );
 		}
 

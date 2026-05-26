@@ -3,7 +3,7 @@
  * Plugin Name: Max Mega Menu
  * Plugin URI:  https://www.megamenu.com
  * Description: An easy to use mega menu plugin. Written the WordPress way.
- * Version:     3.10.2
+ * Version:     3.10.3
  * Requires PHP: 7.4
  * Author:      megamenu.com
  * Author URI:  https://www.megamenu.com
@@ -36,7 +36,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 *
 		 * @var string
 		 */
-		public $version = '3.10.2';
+		public $version = '3.10.3';
 
 
 		/**
@@ -500,8 +500,17 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 				$return[] = 'mega-' . $class;
 			}
 
-			$location = Mega_Menu_Location::find( $args->theme_location );
-			$prefix   = $location ? $location->get_setting( 'prefix', 'enabled' ) : 'enabled';
+			$global_settings = get_option( 'megamenu_settings', [] );
+			$location        = Mega_Menu_Location::find( $args->theme_location );
+
+			$prefix = isset( $global_settings['prefix'] ) ? $global_settings['prefix'] : 'enabled';
+
+			if ( $location ) {
+				$location_settings = $location->get_settings();
+				if ( isset( $location_settings['prefix'] ) ) {
+					$prefix = $location_settings['prefix'];
+				}
+			}
 
 			if ( 'disabled' === $prefix ) {
 				// add in custom classes, sans 'mega-' prefix.
@@ -1305,7 +1314,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 				return $args;
 			}
 
-			$menu_id = $location->get_valid_menu_id();
+			$menu_id = $location->get_menu_id();
 
 			if ( ! $menu_id ) {
 				return $args;

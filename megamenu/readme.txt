@@ -3,7 +3,7 @@ Contributors: megamenu
 Tags: menu, responsive menu, mega menu, navigation, mobile menu
 Requires at least: 6.2
 Tested up to: 7.0
-Stable tag: 3.10.1
+Stable tag: 3.10.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -133,6 +133,14 @@ See https://www.megamenu.com for more screenshots
 5. Back end: Use the theme editor to change the appearance of your menus
 
 == Changelog ==
+
+= 3.10.3 =
+
+* Fix: Restore 3.9.2.1 prefix logic: fall back to global setting before per-location
+
+= 3.10.2 =
+
+* Fix: Restore 3.9.2.1 descriptions logic: fall back to global setting before per-location
 
 = 3.10.1 =
 
