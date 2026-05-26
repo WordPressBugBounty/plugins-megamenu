@@ -2403,8 +2403,15 @@ if ( ! class_exists( 'Mega_Menu_Locations' ) ) :
 		 * @return void
 		 */
 		public function print_descriptions_option( $location ) {
-			$loc          = Mega_Menu_Location::find( $location );
-			$descriptions = $loc ? $loc->get_setting( 'descriptions', 'enabled' ) : 'disabled';
+			$plugin_settings = get_option( 'megamenu_settings', [] );
+			$descriptions    = 'disabled';
+
+			if ( isset( $plugin_settings[ $location ]['descriptions'] ) ) {
+				$descriptions = $plugin_settings[ $location ]['descriptions'];
+			} elseif ( isset( $plugin_settings['descriptions'] ) ) {
+				$descriptions = $plugin_settings['descriptions'];
+			}
+
 			$this->print_location_dialog_pill_checkbox( $location, 'descriptions', 'enabled', 'enabled' === $descriptions );
 		}
 

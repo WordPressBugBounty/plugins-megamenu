@@ -3,7 +3,7 @@
  * Plugin Name: Max Mega Menu
  * Plugin URI:  https://www.megamenu.com
  * Description: An easy to use mega menu plugin. Written the WordPress way.
- * Version:     3.10.1
+ * Version:     3.10.2
  * Requires PHP: 7.4
  * Author:      megamenu.com
  * Author URI:  https://www.megamenu.com
@@ -36,7 +36,7 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 *
 		 * @var string
 		 */
-		public $version = '3.10.1';
+		public $version = '3.10.2';
 
 
 		/**
@@ -1110,8 +1110,16 @@ if ( ! class_exists( 'Mega_Menu' ) ) :
 		 */
 		public function set_descriptions_if_enabled( $items, $args ) {
 
-			$location     = Mega_Menu_Location::find( $args->theme_location );
-			$descriptions = $location ? $location->get_setting( 'descriptions', 'enabled' ) : 'disabled';
+			$location        = Mega_Menu_Location::find( $args->theme_location );
+			$global_settings = get_option( 'megamenu_settings', [] );
+			$descriptions    = isset( $global_settings['descriptions'] ) ? $global_settings['descriptions'] : 'disabled';
+
+			if ( $location ) {
+				$per_location = $location->get_setting( 'descriptions' );
+				if ( null !== $per_location ) {
+					$descriptions = $per_location;
+				}
+			}
 
 			if ( 'enabled' === $descriptions ) {
 				foreach ( $items as $item ) {

@@ -839,9 +839,8 @@
 
         // Arrows
         li.mega-menu-item-has-children {
-            > a.mega-menu-link #{$arrow_combinator} span.mega-indicator {
-                display: inline-flex;
-                align-items: center;
+            > a.mega-menu-link > span.mega-indicator {
+                display: inline-block;
                 height: 100%;
                 font-size: inherit;
                 line-height: inherit;
@@ -849,7 +848,12 @@
                 color: inherit;
 
                 &:after {
-                    display: block;
+                    display: inline-block;
+                    
+                    @if $arrow_font != svg {
+                        vertical-align: top;
+                    }
+                    
                     -webkit-font-smoothing: antialiased;
                     -moz-osx-font-smoothing: grayscale;
                     @include arrow-icon($arrow_down, $arrow_font, $arrow_font_weight);
