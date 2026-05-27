@@ -3,7 +3,7 @@ Contributors: megamenu
 Tags: menu, responsive menu, mega menu, navigation, mobile menu
 Requires at least: 6.2
 Tested up to: 7.0
-Stable tag: 3.10.2
+Stable tag: 3.10.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -19,6 +19,7 @@ Create new menus from scratch or enhance your existing ones. With Max Mega Menu 
 Place menus via a block, page builder element (Bricks, Divi & Elementor), shortcode, widget or `wp_nav_menu`. The result is a light weight, user friendly, accessible and touch ready mega menu with just a few clicks.
 
 Documentation & Demo: [https://www.megamenu.com](https://www.megamenu.com)
+
 
 ###Mobile
 
@@ -133,6 +134,13 @@ See https://www.megamenu.com for more screenshots
 5. Back end: Use the theme editor to change the appearance of your menus
 
 == Changelog ==
+
+= 3.10.4 =
+
+* Fix: Standard Menu Toggle not working when text is hidden and menu CSS has not been updated/regenerated since v3.5 (clearing the menu CSS Cache will also fix this issue)
+* Improvement: Re-enable location Save button when switching from Preview to Settings
+* Improvement: Color picker - If the alpha is at 0%, picking a new color automatically resets the alpha to 100%
+* Improvement: Icon picker - clicking a selected icon will deselect it
 
 = 3.10.3 =
 
