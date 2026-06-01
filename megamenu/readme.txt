@@ -3,7 +3,7 @@ Contributors: megamenu
 Tags: menu, responsive menu, mega menu, navigation, mobile menu
 Requires at least: 6.2
 Tested up to: 7.0
-Stable tag: 3.10.3
+Stable tag: 3.10.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -19,7 +19,6 @@ Create new menus from scratch or enhance your existing ones. With Max Mega Menu 
 Place menus via a block, page builder element (Bricks, Divi & Elementor), shortcode, widget or `wp_nav_menu`. The result is a light weight, user friendly, accessible and touch ready mega menu with just a few clicks.
 
 Documentation & Demo: [https://www.megamenu.com](https://www.megamenu.com)
-
 
 ###Mobile
 
@@ -134,6 +133,12 @@ See https://www.megamenu.com for more screenshots
 5. Back end: Use the theme editor to change the appearance of your menus
 
 == Changelog ==
+
+= 3.10.5 =
+
+* Fix: Fatal error with Divi 5 in some shared environments
+* Fix: Close icon not appearing on mobile menu
+* New: Breakdance native module - add a Max Mega Menu Location module to your page layout via the Breadance Builder
 
 = 3.10.4 =
 
